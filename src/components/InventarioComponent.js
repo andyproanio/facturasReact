@@ -1,21 +1,13 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import { Form, FormGroup, Label, Input, Table, Pagination, PaginationItem, PaginationLink } from 'reactstrap';
 import { JsonToExcel } from 'react-json-to-excel';
 import { useNavigate } from 'react-router-dom';
 
 const Inventario = () => {
   const [mes, setmes] = useState("")
-  const [inventario, setinventario] = useState([])
+  const [inventario, setinventario] = useState(() => JSON.parse(localStorage.getItem('facturas')) || [])
   const pagina = parseInt(window.location.pathname.split("/").pop())
   const navigate = useNavigate()
-
-  useEffect(() => {
-    return () => {
-      if (localStorage.getItem("facturas")) {
-        setinventario(JSON.parse(localStorage.getItem("facturas")))
-      }
-    };
-  }, [])
 
   const handleInput = async (e) => {
     localStorage.removeItem("mes")
