@@ -32,7 +32,7 @@ const Home = (props) => {
       <Form onSubmit={handleSubmit}>
         <FormGroup>
           <Label for="exampleFile">
-            Archivo de comprobantes decargado del SRI
+            Archivo de comprobantes descargado del SRI
           </Label>
           <Input onChange={handleInput}
             id="exampleFile"
