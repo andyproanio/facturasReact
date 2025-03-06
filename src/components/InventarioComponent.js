@@ -4,26 +4,48 @@ import { JsonToExcel } from 'react-json-to-excel';
 import { useNavigate } from 'react-router-dom';
 
 const Inventario = () => {
-  const [mes, setmes] = useState("")
+  const [mes, setmes] = useState(localStorage.getItem('mes') || "")
+  const [anio, setanio] = useState(localStorage.getItem('anio') || "")
   const [inventario, setinventario] = useState(() => JSON.parse(localStorage.getItem('facturas')) || [])
   const pagina = parseInt(window.location.pathname.split("/").pop())
   const navigate = useNavigate()
 
-  const handleInput = async (e) => {
+  const handleInput = (e) => {
     localStorage.removeItem("mes")
-    navigate("/inventario/" + pagina)
     const mesElegido = e.target.value
-    const url = "https://facturasdrf.onrender.com/api/FiltrarInventario?mes=" + mesElegido.toLowerCase()
-    if (mesElegido !== "Seleccione") {
+    setmes(mesElegido)
+    if (anio !== "")
+      getData(mesElegido, anio)
+  }
+
+  const handleInput1 = (e) => {
+    localStorage.removeItem("anio")
+    const anioElegido = e.target.value
+    setanio(anioElegido)
+    if (mes !== "")
+      getData(mes, anioElegido)
+  }
+
+  const getData = async (mesElegido, anioElegido) => {
+    navigate("/inventario/" + pagina)
+    let fechaElegida = ""
+    if ((mesElegido !== "Enero" && anioElegido === "2024") || (mesElegido === "Enero" && anioElegido === "2025")) {
+      fechaElegida = mesElegido.toLowerCase()
+    }
+    else
+      fechaElegida = mesElegido.toLowerCase() + "_" + anioElegido
+    const url = "https://facturasdrf.onrender.com/api/FiltrarInventario?mes=" + fechaElegida
+    if (mesElegido !== "Seleccione" && anioElegido !== "Seleccione") {
       try {
         const response = await fetch(url)
         if (response.ok) {
           const facturas = await response.json()
           setinventario(facturas)
-          setmes(mesElegido)
         }
-        else
-          alert("No hay facturas para el mes elegido")
+        else {
+          alert("No hay facturas para la fecha elegida")
+          setinventario([])
+        }
       } catch (error) {
         console.log(error)
       }
@@ -33,8 +55,10 @@ const Inventario = () => {
   }
 
   const changePage = () => {
-    if (mes !== "")
+    if (mes !== "" && anio !== "") {
       localStorage.setItem("mes", mes)
+      localStorage.setItem("anio", anio)
+    }
     localStorage.setItem("facturas", JSON.stringify(inventario))
   }
 
@@ -161,6 +185,24 @@ const Inventario = () => {
                 className='w-50'
                 value={localStorage.getItem('mes')}
               ></Input>}
+              <Label for="exampleSelect" className='mt-3'>
+                Escoja el año
+              </Label>
+              {pagina === 1 ? <Input onChange={handleInput1}
+                id="exampleSelect"
+                name="select"
+                type="select"
+                className='w-50'
+                value={localStorage.getItem('anio')}
+              >
+                <option>
+                  Seleccione
+                </option>
+                <Options />
+              </Input> : <Input disabled
+                className='w-50'
+                value={localStorage.getItem('anio')}
+              ></Input>}
             </FormGroup>
           </Form>
         </div>
@@ -259,6 +301,15 @@ const Inventario = () => {
       </Pagination> : null}
     </div>
   )
+}
+
+const Options = () => {
+
+  let years = Array.from(new Array(16), (val, index) => index + 2024);
+  return (
+    years.map((year) => {
+      return <option>{year}</option>
+    }))
 }
 
 export default Inventario
