@@ -1,12 +1,14 @@
 import React, { useState } from 'react'
-import { Form, FormGroup, Label, Input, Table, Pagination, PaginationItem, PaginationLink } from 'reactstrap';
+import { Form, FormGroup, Label, Input, Button, Table, Pagination, PaginationItem, PaginationLink } from 'reactstrap';
 import { JsonToExcel } from 'react-json-to-excel';
 import { useNavigate } from 'react-router-dom';
 
 const Inventario = () => {
   const [mes, setmes] = useState(localStorage.getItem('mes') || "")
   const [anio, setanio] = useState(localStorage.getItem('anio') || "")
+  const [cedula, setcedula] = useState(localStorage.getItem('cedula') || "")
   const [inventario, setinventario] = useState(() => JSON.parse(localStorage.getItem('facturas')) || [])
+  const [activo, setactivo] = useState(localStorage.getItem('activo') ||false)
   const pagina = parseInt(window.location.pathname.split("/").pop())
   const navigate = useNavigate()
 
@@ -26,6 +28,21 @@ const Inventario = () => {
       getData(mes, anioElegido)
   }
 
+  const handleChange = (e) => {
+    setcedula(e.target.value);
+  }
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    setactivo(true)
+  }
+
+  const handleClick = async (e) => {
+    e.preventDefault()
+    localStorage.clear()
+    window.location.replace('')
+  }
+
   const getData = async (mesElegido, anioElegido) => {
     navigate("/inventario/" + pagina)
     let fechaElegida = ""
@@ -34,7 +51,7 @@ const Inventario = () => {
     }
     else
       fechaElegida = mesElegido.toLowerCase() + "_" + anioElegido
-    const url = "https://facturasdrf.onrender.com/api/FiltrarInventario?mes=" + fechaElegida
+    const url = "https://facturasdrf.onrender.com/api/FiltrarInventario?mes=" + fechaElegida + "&cedula=" + cedula
     if (mesElegido !== "Seleccione" && anioElegido !== "Seleccione") {
       try {
         const response = await fetch(url)
@@ -55,6 +72,8 @@ const Inventario = () => {
   }
 
   const changePage = () => {
+    localStorage.setItem("cedula", cedula)
+    localStorage.setItem("activo", activo)
     if (mes !== "" && anio !== "") {
       localStorage.setItem("mes", mes)
       localStorage.setItem("anio", anio)
@@ -130,92 +149,111 @@ const Inventario = () => {
     <div className='container'>
       <div className='row'>
         <div className='col-6'>
-          <Form>
-            <FormGroup>
-              <Label for="exampleSelect" className='mt-3'>
-                Escoja el mes
-              </Label>
-              {pagina === 1 ? <Input onChange={handleInput}
-                id="exampleSelect"
-                name="select"
-                type="select"
-                className='w-50'
-                value={localStorage.getItem('mes')}
-              >
-                <option>
-                  Seleccione
-                </option>
-                <option>
-                  Enero
-                </option>
-                <option>
-                  Febrero
-                </option>
-                <option>
-                  Marzo
-                </option>
-                <option>
-                  Abril
-                </option>
-                <option>
-                  Mayo
-                </option>
-                <option>
-                  Junio
-                </option>
-                <option>
-                  Julio
-                </option>
-                <option>
-                  Agosto
-                </option>
-                <option>
-                  Septiembre
-                </option>
-                <option>
-                  Octubre
-                </option>
-                <option>
-                  Noviembre
-                </option>
-                <option>
-                  Diciembre
-                </option>
-              </Input> : <Input disabled
-                className='w-50'
-                value={localStorage.getItem('mes')}
-              ></Input>}
-              <Label for="exampleSelect" className='mt-3'>
-                Escoja el año
-              </Label>
-              {pagina === 1 ? <Input onChange={handleInput1}
-                id="exampleSelect"
-                name="select"
-                type="select"
-                className='w-50'
-                value={localStorage.getItem('anio')}
-              >
-                <option>
-                  Seleccione
-                </option>
-                <Options />
-              </Input> : <Input disabled
-                className='w-50'
-                value={localStorage.getItem('anio')}
-              ></Input>}
-            </FormGroup>
-          </Form>
+        <br></br>
+        {!activo  ? <Form onSubmit={handleSubmit}>
+          <FormGroup>
+            <Label for="exampleTextBox">
+              Ingrese RUC o Cédula
+            </Label>
+            <Input onChange={handleChange}
+              id="exampleTextBox"
+              name="text"
+              type="text"
+              className='w-50'
+              value={localStorage.getItem('cedula')}
+            />
+          </FormGroup>
+          <Button>
+            Cargar
+          </Button>
+        </Form> : null}
+        {activo  ? <Form>
+          <FormGroup>
+            <Label for="exampleSelect" className='mt-3'>
+              Escoja el mes
+            </Label>
+            {pagina === 1 ? <Input onChange={handleInput}
+              id="exampleSelect"
+              name="select"
+              type="select"
+              className='w-50'
+              value={localStorage.getItem('mes')}
+            >
+              <option>
+                Seleccione
+              </option>
+              <option>
+                Enero
+              </option>
+              <option>
+                Febrero
+              </option>
+              <option>
+                Marzo
+              </option>
+              <option>
+                Abril
+              </option>
+              <option>
+                Mayo
+              </option>
+              <option>
+                Junio
+              </option>
+              <option>
+                Julio
+              </option>
+              <option>
+                Agosto
+              </option>
+              <option>
+                Septiembre
+              </option>
+              <option>
+                Octubre
+              </option>
+              <option>
+                Noviembre
+              </option>
+              <option>
+                Diciembre
+              </option>
+            </Input> : <Input disabled
+              className='w-50'
+              value={localStorage.getItem('mes')}
+            ></Input>}
+            <Label for="exampleSelect" className='mt-3'>
+              Escoja el año
+            </Label>
+            {pagina === 1 ? <Input onChange={handleInput1}
+              id="exampleSelect"
+              name="select"
+              type="select"
+              className='w-50'
+              value={localStorage.getItem('anio')}
+            >
+              <option>
+                Seleccione
+              </option>
+              <Options />
+            </Input> : <Input disabled
+              className='w-50'
+              value={localStorage.getItem('anio')}
+            ></Input>}
+          </FormGroup>
+        </Form> : null}
+        <div>{activo  ? <Button onClick={(handleClick)}>Nuevo RUC o Cédula</Button> : null}</div>
         </div>
         {inventario.length > 0 ? <div className='col-6 mt-4'>
           <JsonToExcel
             title="Exportar a Excel"
             data={inventario}
-            fileName={mes}
+            fileName={mes + "_" + anio}
             btnClassName="custom-classname"
           />
         </div> : null}
       </div>
-      <Table
+      {activo  ? <Table
         size="sm"
         striped
       >
@@ -258,7 +296,7 @@ const Inventario = () => {
         </tbody> : <tbody>
           {celdasFaltantes}
         </tbody>}
-      </Table>
+      </Table> : null}
       {inventario.length > 0 ? <Pagination onClick={changePage}
         aria-label="Page navigation example"
         size="sm"
